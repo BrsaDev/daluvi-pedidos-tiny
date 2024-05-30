@@ -6,7 +6,7 @@ const { sendEmail } = require("./email")
 const { check_email_enviado } = require("../helpers/verifyEmail")
 const { Op, literal, fn, col, where } = require('sequelize')
 
-const token = "35bddacc3d9f40f54162fe228cfbaf944dfc79760e95904f60c31f8915c641f9"
+const token = ""
 
 const tipoPagamento = {
     "1": "Boleto", "2": "Cartão de Crédito", "3": "Boleto Parcelado", "4": "Grátis", "5": "Pix"
