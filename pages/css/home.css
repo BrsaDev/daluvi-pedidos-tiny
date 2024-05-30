@@ -1,0 +1,83 @@
+html, body {
+    padding: 0 !important;
+    margin: 0 !important;
+    height: 100vh !important;
+    font-family: "Montserrat", sans-serif !important;
+    scroll-behavior: smooth !important;
+}
+
+.bg-my-blueligth {
+    background-color: #74c0fc !important;
+}
+.bg-my-gray {
+    background-color: #f9f9f9 !important;
+}
+.fw-my-bold {
+    font-weight: 500 !important;
+}
+
+.my-fs-3 {
+    font-size: 1.8rem !important;
+}
+.my-fs-5 {
+    font-size: 1rem !important;
+}
+.my-p-5 {
+    padding: 20px !important;
+}
+.my-w {
+    width: auto !important;
+}
+.pointer {
+    cursor: pointer !important;
+}
+.scroll {
+    overflow: auto !important;
+}
+.rem0788 {
+    font-size: 0.788rem !important;
+}
+.col-vazia {
+    min-width: 80px !important;
+}
+.h-table {
+    max-height: 38vh !important;
+}
+.sticky {
+    position: sticky !important;
+    top: 0px;
+}
+
+.scroll::-webkit-scrollbar-track{
+	/*-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);*/
+	border-radius:0;
+	background-color: #D0D4CE;
+}
+
+.scroll::-webkit-scrollbar{
+	width: 6px;
+    height: 6px;
+	background-color: #D0D4CE;
+}
+
+.scroll::-webkit-scrollbar-thumb{
+	border-radius:0;
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: #74c0fc; /* #71806B; */
+}
+
+
+@media screen and (max-width:1080px){
+    
+}
+@media screen and (max-width:767px){
+    .my-fs-3 {
+        font-size: 1.2rem !important;
+    }
+    .my-fs-5 {
+        font-size: 0.748rem !important;
+    }
+    .my-w {
+        width: 100% !important;
+    }
+}
