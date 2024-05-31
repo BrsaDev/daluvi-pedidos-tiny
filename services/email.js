@@ -4,7 +4,7 @@ var transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: 'daluvi.dev@gmail.com',
-        pass: ''
+        pass: 'zgjx quvw abko fktk'
     }
 });
 
@@ -13,7 +13,7 @@ module.exports = {
     sendEmail: (pedido) => {
         var mailOptions = {
             from: 'daluvi.dev@gmail.com',
-            to: 'brsilvaaraujo@gmail.com', // adm@daluvi.com
+            to: "adm@daluvi.com",
             subject: 'Aviso! Pedido não enviado',
             html: `<h2 style="color: #c20000;">Informação urgente!</h2>
 <h3 style="font-style: italic; color: #c20000;">O pedido não foi enviado, pois não encontrou o sku correspondente.</h3>
@@ -29,7 +29,6 @@ Data:        ${pedido.data}<br>
 <strong>OBS:</strong> <span style="font-style: italic;">Inserir ou ajustar o sku correspondente ao pedido para enviar.</span>
             `
         };
-
         return {mailOptions, transporter}
     }
 }

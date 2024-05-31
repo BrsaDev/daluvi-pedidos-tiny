@@ -41,18 +41,6 @@
                                     <input type="text" id="sku" class="form-control form-control-sm">
                                 </div> 
                             </div>
-                            <div class="row mt-2">
-                                <div class="form-group col-12 col-md-6">
-                                     <label>Produto</label>
-                                     <input autofocus type="text" id="produto" class="form-control form-control-sm">
-                                 </div>
-                            </div>
-                            <div class="form-check mt-2">
-                                <input class="form-check-input" type="checkbox" id="upsell">
-                                <label class="form-check-label">
-                                  É upsell
-                                </label>
-                            </div>
                             <div class="row mt-2 gap-2">
                                 <div>
                                     <button onclick="cadastrarSku()" class="btn btn-sm btn-primary fw-bold col-12 col-md-2 mt-3">Interligar</button>
@@ -75,8 +63,8 @@
                                                 <tr class="text-center text-nowrap text-light bg-primary sticky">
                                                     <th scope="col">Key</th>
                                                     <th scope="col">Sku</th>
-                                                    <th scope="col">Produto</th>
-                                                    <th scope="col">Upsell</th>
+                                                    <th scope="col"></th>
+                                                    <th scope="col"></th>
                                                     <th scope="col"></th>
                                                     <th scope="col"></th>
                                                     <th scope="col"></th>
@@ -98,8 +86,6 @@
         <script>
             let key = document.querySelector("#key")
             let sku = document.querySelector("#sku")
-            let produto = document.querySelector("#produto")
-            let upsell = document.querySelector("#upsell")
             let tbody = document.querySelector("#tbody")
             let listagemSkus = document.querySelector("#listagem-skus")
             let btnListagemSkus = document.querySelector("#btn-listagem-skus")
@@ -108,22 +94,19 @@
                 let erros = []
                 if ( key.value == "" ) erros.push("PlanKey não pode ser vazio.")
                 if ( sku.value == "" ) erros.push("Sku não pode ser vazio.")
-                if ( produto.value == "" ) erros.push("Produto não pode ser vazio.")
                 if ( erros.length > 0 ) return alert(erros[0])
 
                 let response = await axios.post("https://ferramentasdaluvi.com/cadastrar-sku", {
                     key: key.value.trim(), 
-                    sku: sku.value.trim(),
-                    produto: produto.value,
-                    upsell: upsell.checked
+                    sku: sku.value.trim()
                 })
                 if ( response.data.resultado ) {
                     tbody.innerHTML += `
                         <tr class="text-nowrap">
                             <td scope="col" class="text-center"><i class="fas fa-trash-alt pointer" style="margin-right: 5px;" onclick="deleteSku('${response.data.resultado.sku}')"></i>${response.data.resultado.key}</td>
                             <td scope="col" class="text-center">${response.data.resultado.sku}</td>
-                            <td scope="col" class="text-center">${response.data.resultado.produto}</td>
-                            <td scope="col" class="text-center">${(response.data.resultado.upsell?"Sim": "Não")}</td>
+                            <td scope="col" class="text-center"></td>
+                            <td scope="col" class="text-center"></td>
                             <td scope="col" class="col-vazia"></td>
                             <td scope="col" class="col-vazia"></td>
                             <td scope="col" class="col-vazia"></td>
@@ -133,9 +116,7 @@
                     `
                     key.value = ""
                     sku.value = ""
-                    produto.value = ""
-                    upsell.checked = false
-                    return alert("Sku cadastrado com sucesso.")
+                    return //alert("Sku cadastrado com sucesso.")
                 }
                 if ( response.data.erro && response.data.msg == "Valores vazios." ) {
                     return alert("Preencha corretamente os campos para enviar.")
@@ -184,8 +165,8 @@
                         <tr class="text-nowrap">
                             <td scope="col" class="text-center"><i class="fas fa-trash-alt pointer" style="margin-right: 5px;" onclick="deleteSku('${item.sku}')"></i>${item.key}</td>
                             <td scope="col" class="text-center">${item.sku}</td>
-                            <td scope="col" class="text-center">${item.produto}</td>
-                            <td scope="col" class="text-center">${(item.upsell?"Sim": "Não")}</td>
+                            <td scope="col" class="text-center"></td>
+                            <td scope="col" class="text-center"></td>
                             <td scope="col" class="col-vazia"></td>
                             <td scope="col" class="col-vazia"></td>
                             <td scope="col" class="col-vazia"></td>

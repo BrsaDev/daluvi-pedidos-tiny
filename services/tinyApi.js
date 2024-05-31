@@ -6,10 +6,36 @@ const { sendEmail } = require("./email")
 const { check_email_enviado } = require("../helpers/verifyEmail")
 const { Op, literal, fn, col, where } = require('sequelize')
 
-const token = ""
+const token = "35bddacc3d9f40f54162fe228cfbaf944dfc79760e95904f60c31f8915c641f9"
 
 const tipoPagamento = {
     "1": "Boleto", "2": "Cartão de Crédito", "3": "Boleto Parcelado", "4": "Grátis", "5": "Pix"
+}
+
+function diferencaHoras(dtPartida, dtChegada) {
+    var date1 = new Date(dtPartida),
+    date2 = new Date(dtChegada);
+  
+    var diffMs = (date2 - date1);
+    var diffHrs = Math.floor((diffMs % 86400000) / 3600000);
+    var diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
+    return { hora: diffHrs, minutos: diffMins }
+  }
+
+function formateData(data) {
+    var data = new Date(data)
+    return data.toLocaleDateString()
+}
+function formateValor(valor) {
+    if ( valor.toString().length == 5 ) {
+        return parseFloat( valor.toString().slice(0, 3) + '.' + valor.toString().slice(3) )
+    }
+    if ( valor.toString().length == 6 ) {
+        return parseFloat( valor.toString().slice(0, 4) + '.' + valor.toString().slice(4) )
+    }
+    if ( valor.toString().length == 7 ) {
+        return parseFloat( valor.toString().slice(0, 5) + '.' + valor.toString().slice(5) )
+    }
 }
 
 module.exports = {
@@ -21,8 +47,7 @@ module.exports = {
             for ( let base of getSkus ) { baseSkus[base.key] = base.sku }
             let body = {
                 "pedido": {
-                    "data_pedido": pedido.trans_createdate,
-                    "data_prevista": "22/10/2014",
+                    "data_pedido": formateData(pedido.trans_createdate),
                     "cliente": {
                         "nome"         : pedido.client_name,
                         "cpf_cnpj"     : pedido.client_documment,
@@ -48,18 +73,35 @@ module.exports = {
                 }
             }
             let skuNaoEncontrados = []
-            for ( let item of pedido.trans_items ) {
-                if ( typeof baseSkus[item.plan_key] == "undefined" ) {
-                    skuNaoEncontrados.push(item.plan_key)
+            if ( typeof pedido.trans_items != 'undefined' ) {
+                for ( let item of pedido.trans_items ) {
+                    if ( typeof baseSkus[item.product_key] == "undefined" ) {
+                        skuNaoEncontrados.push(item.product_key)
+                    }
+                    body.pedido.itens.push(
+                        {
+                            "item": {
+                                "codigo": baseSkus[item.product_key],
+                                "descricao": item.product_name,
+                                "unidade": "UN",
+                                "quantidade": item.plan_amount,
+                                "valor_unitario": formateValor(item.plan_value)
+                            }
+                        }
+                    )
+                }
+            }else {
+                if ( typeof baseSkus[pedido.product_key] == "undefined" ) {
+                    skuNaoEncontrados.push(pedido.product_key)
                 }
                 body.pedido.itens.push(
                     {
                         "item": {
-                            "codigo": baseSkus[item.plan_key],
-                            "descricao": item.product_name,
+                            "codigo": baseSkus[pedido.product_key],
+                            "descricao": pedido.product_name,
                             "unidade": "UN",
-                            "quantidade": item.plan_amount,
-                            "valor_unitario": item.plan_value
+                            "quantidade": pedido.plan_amount,
+                            "valor_unitario": formateValor(pedido.trans_value)
                         }
                     }
                 )
@@ -91,27 +133,14 @@ module.exports = {
                     });
                 }
             }
-            let options = {
-                method: "post",
-                payload: `pedido=${JSON.stringify(body)}`
-            }
-            let response = await axios(`https://api.tiny.com.br/api2/pedido.incluir.php?token=${token}&formato=json`, options)
-            if ( response.retorno.status == "OK" ) {
+            let response = await axios.post(`https://api.tiny.com.br/api2/pedido.incluir.php?token=${token}&formato=json&pedido=${JSON.stringify(body)}`)
+            
+            if ( response.data.retorno.status == "OK" ) {
                 return body.pedido
             }
             return false
         }
     }
-}
-
-function diferencaHoras(dtPartida, dtChegada) {
-  var date1 = new Date(dtPartida),
-  date2 = new Date(dtChegada);
-
-  var diffMs = (date2 - date1);
-  var diffHrs = Math.floor((diffMs % 86400000) / 3600000);
-  var diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000);
-  return { hora: diffHrs, minutos: diffMins }
 }
 
   

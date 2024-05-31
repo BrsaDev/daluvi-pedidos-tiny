@@ -13,14 +13,6 @@ const Skus = db.sequelize.define('skus', {
     sku: {
         type: db.Sequelize.STRING,
         allowNull: false
-    },
-    produto: {
-        type: db.Sequelize.STRING,
-        allowNull: false
-    },
-    upsell: {
-        type: db.Sequelize.BOOLEAN,
-        allowNull: false
     }
 }, { timestamps: false } )
 

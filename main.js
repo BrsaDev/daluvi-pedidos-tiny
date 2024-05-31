@@ -64,8 +64,8 @@ app.post("/delete-sku", async (req, res) => {
 
 app.post("/cadastrar-sku", async (req, res) => {
     try {
-        let { sku, key, produto, upsell } = req.body
-        if ( sku == "" || key == "" || produto == "" ) return res.json({ erro: "OK", msg: "Valores vazios."})
+        let { sku, key } = req.body
+        if ( sku == "" || key == "" ) return res.json({ erro: "OK", msg: "Valores vazios."})
         let resSku = await Skus.findOne({ where:{ [Op.or]: {sku, key} } })
         resSku = JSON.parse(JSON.stringify(resSku, null, 2))
         if ( resSku ) {
@@ -78,9 +78,7 @@ app.post("/cadastrar-sku", async (req, res) => {
         }else {
             let response = await Skus.create({
                 key,
-                sku,
-                produto, 
-                upsell
+                sku
             })
             if ( response.erro ) {
                 return res.json({ erro: "OK", msg: response.erro })
@@ -99,4 +97,6 @@ process.on('exit', (code) => {
     console.log('Fechando o processo com o código: ', code);
 });
 
+
+    
 
