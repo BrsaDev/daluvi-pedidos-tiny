@@ -30,10 +30,10 @@ app.post("/receiver-orders", async (req, res) => {
         await update_order(oldPedido, reqBody)
     }else {
         await create_order(reqBody) 
-    }     
+    }  
     let pedidoAprovado = isPedidoAprovado(reqBody)
     if ( pedidoAprovado ) {
-        let pedido = chech_exists_order_temp(pedidoAprovado)
+        let pedido = await chech_exists_order_temp(pedidoAprovado)
         if ( !pedido.erro && pedido ) {
             let pedidoUpsell = isUpsell(reqBody)
             if ( pedidoUpsell ) {
@@ -52,6 +52,14 @@ app.get("/buscar-skus", async (req, res) => {
         skus = JSON.parse(JSON.stringify(skus, null, 2))
         return res.json({ skus })
     }catch(erro) { return res.json({erro, msg: "Erro no buscar os skus"})}
+})
+
+app.post("/delete-sku", async (req, res) => {
+    let { sku } = req.body
+    let resSku = await Skus.destroy({ where:{ sku } })
+    resSku = JSON.parse(JSON.stringify(resSku, null, 2))
+    if ( resSku ) return res.json({msg: "Sku deletado"})
+    res.json({msg: "Erro"})
 })
 
 app.post("/cadastrar-sku", async (req, res) => {

@@ -111,16 +111,16 @@
                 if ( produto.value == "" ) erros.push("Produto não pode ser vazio.")
                 if ( erros.length > 0 ) return alert(erros[0])
 
-                let response = await axios.post("http://localhost:3005/cadastrar-sku", {
-                    key: key.value, 
-                    sku: sku.value,
+                let response = await axios.post("https://ferramentasdaluvi.com/cadastrar-sku", {
+                    key: key.value.trim(), 
+                    sku: sku.value.trim(),
                     produto: produto.value,
                     upsell: upsell.checked
                 })
                 if ( response.data.resultado ) {
                     tbody.innerHTML += `
                         <tr class="text-nowrap">
-                            <td scope="col" class="text-center">${response.data.resultado.key}</td>
+                            <td scope="col" class="text-center"><i class="fas fa-trash-alt pointer" style="margin-right: 5px;" onclick="deleteSku('${response.data.resultado.sku}')"></i>${response.data.resultado.key}</td>
                             <td scope="col" class="text-center">${response.data.resultado.sku}</td>
                             <td scope="col" class="text-center">${response.data.resultado.produto}</td>
                             <td scope="col" class="text-center">${(response.data.resultado.upsell?"Sim": "Não")}</td>
@@ -161,14 +161,28 @@
                     btnEsconderSkus.classList.add('d-none')
                 }
             }
+            async function deleteSku(sku) {
+                let response = await axios.post("https://ferramentasdaluvi.com/delete-sku", {sku})
+                if ( response.data.msg == "Sku deletado" ) {
+                    let trs = tbody.getElementsByTagName('tr')
+                    let linha = 0
+                    for ( let tr of trs ) {
+                        if ( tr.innerText.includes(sku) ) {
+                            tr.parentNode.removeChild(tr)
+                            break
+                        }
+                        linha++
+                    }
+                }
+            }
             async function getSkus() {
-                let response = await axios("http://localhost:3005/buscar-skus")
+                let response = await axios("https://ferramentasdaluvi.com/buscar-skus")
                 let lista = ""
                 if ( response.data.skus ) {
                     for ( let item of response.data.skus ) {
                         lista += `
                         <tr class="text-nowrap">
-                            <td scope="col" class="text-center">${item.key}</td>
+                            <td scope="col" class="text-center"><i class="fas fa-trash-alt pointer" style="margin-right: 5px;" onclick="deleteSku('${item.sku}')"></i>${item.key}</td>
                             <td scope="col" class="text-center">${item.sku}</td>
                             <td scope="col" class="text-center">${item.produto}</td>
                             <td scope="col" class="text-center">${(item.upsell?"Sim": "Não")}</td>

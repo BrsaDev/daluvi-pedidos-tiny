@@ -1,4 +1,5 @@
-const {verifica_pedidos_pronto_envio} = require("./verifyOrder")
+const { verifica_pedidos_pronto_envio } = require("./verifyOrder")
+const { delete_order_temp } = require("./saveOrdersBd")
 const { Tiny } = require("../services/tinyApi")
 
 module.exports = {
@@ -7,8 +8,10 @@ module.exports = {
             let response = await verifica_pedidos_pronto_envio()
             if ( response.pedidos ) {
                 for ( let pedido of response.pedidos ) {
-                    // Tiny.create_order(JSON.parse(pedido.pedido))
-                    console.log(JSON.parse(pedido.pedido))
+                    let pedidoCriado = await Tiny.create_order(JSON.parse(pedido.pedido))
+                    if ( pedidoCriado ) {
+                       await delete_order_temp(pedidoCriado.cliente.cpf_cnpj)
+                    }
                 }
             }
         }, 60000)

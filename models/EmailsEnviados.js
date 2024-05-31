@@ -16,6 +16,6 @@ const EmailsEnviados = db.sequelize.define('emails_enviados', {
     }
 }, { timestamps: false } )
 
-//EmailsEnviados.sync({force:true})
+// EmailsEnviados.sync({force:true})
 
 module.exports = EmailsEnviados

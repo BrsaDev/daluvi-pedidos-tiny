@@ -15,7 +15,10 @@ const tipoPagamento = {
 module.exports = {
     Tiny: {
         create_order: async (pedido) => {
-            let baseSkus = await Skus.findAll()
+            let getSkus = await Skus.findAll()
+            getSkus = JSON.parse(JSON.stringify(getSkus, null, 2))
+            let baseSkus = {}
+            for ( let base of getSkus ) { baseSkus[base.key] = base.sku }
             let body = {
                 "pedido": {
                     "data_pedido": pedido.trans_createdate,
@@ -46,13 +49,13 @@ module.exports = {
             }
             let skuNaoEncontrados = []
             for ( let item of pedido.trans_items ) {
-                if ( typeof baseSkus[item.product_key] == "undefined" ) {
-                    skuNaoEncontrados.push(item.product_key)
+                if ( typeof baseSkus[item.plan_key] == "undefined" ) {
+                    skuNaoEncontrados.push(item.plan_key)
                 }
                 body.pedido.itens.push(
                     {
                         "item": {
-                            "codigo": baseSkus[item.product_key],
+                            "codigo": baseSkus[item.plan_key],
                             "descricao": item.product_name,
                             "unidade": "UN",
                             "quantidade": item.plan_amount,
@@ -62,34 +65,39 @@ module.exports = {
                 )
             }
             if ( skuNaoEncontrados.length > 0 ) {
-                if ( check_email_enviado(pedido) ) return true
-                let skus = ""
-                for ( let skuNaoEncontrado of skuNaoEncontrados ) {
-                    skus += " " + skuNaoEncontrado
-                }
-                let email = sendEmail({
-                    data: pedido.trans_createdate, 
-                    skus: skus.slice(1), 
-                    cpf: pedido.client_documment, 
-                    numero: pedido.plan_key,
-                    produto: pedido.product_name
-                })
-                if ( email ) {
-                    EmailsEnviados.create({
-                        plan_key: pedido.plan_key,
-                        documento: pedido.client_documment
+                let checkEmail = await check_email_enviado(pedido)
+                if ( checkEmail.erro || !checkEmail ) {
+                    let skus = ""
+                    for ( let skuNaoEncontrado of skuNaoEncontrados ) {
+                        skus += " " + skuNaoEncontrado
+                    }
+                    let responseEmail = sendEmail({
+                        data: pedido.trans_createdate, 
+                        skus: skus.slice(1), 
+                        cpf: pedido.client_documment, 
+                        numero: pedido.plan_key,
+                        produto: pedido.product_name
                     })
+                    responseEmail.transporter.sendMail(responseEmail.mailOptions, async function (erro, info) {
+                        if (erro) {
+                            return false
+                        } else {
+                            await EmailsEnviados.create({
+                                plan_key: pedido.plan_key,
+                                documento: pedido.client_documment
+                            })
+                            return true
+                        }
+                    });
                 }
-                return false
             }
-            console.log(body.pedido)
             let options = {
                 method: "post",
                 payload: `pedido=${JSON.stringify(body)}`
             }
             let response = await axios(`https://api.tiny.com.br/api2/pedido.incluir.php?token=${token}&formato=json`, options)
             if ( response.retorno.status == "OK" ) {
-                 return true
+                return body.pedido
             }
             return false
         }

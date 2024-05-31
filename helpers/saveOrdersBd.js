@@ -18,10 +18,17 @@ module.exports = {
         if ( pedidoCriado ) return true
         return false
     },
+    delete_order_temp: async (documento) => {
+        let deletado = await OrdersTemp.destroy({
+            where: { documento }
+        })
+        if ( deletado ) return true
+        return false
+    },
     create_order: async (pedido) => {
         let pedidoCriado = await Orders.create({
-            documento: pedido.client_documment,
-            plan_key: pedido.plan_key,
+            documento: pedido[0].client_documment,
+            plan_key: pedido[0].plan_key,
             pedido: JSON.stringify(pedido),
             time_entrada: new Date()
         })
@@ -86,7 +93,6 @@ module.exports = {
                 }) 
             }
         }
-        
         let update = await OrdersTemp.update(
             {
                 pedido: JSON.stringify(pedido)
@@ -96,63 +102,16 @@ module.exports = {
         if ( update ) return true
         return false
     },
-    update_order: async (oldPedido, pedido) => { // oldPedido = obj | pedido = array
-        if ( typeof oldPedido.trans_items != 'undefined' ) {
-            for ( let item of pedido ) {
-                if ( typeof item.trans_items != 'undefined' ) {
-                    for ( let element of item.trans_items ) {
-                        if ( element.main == 0 ) {
-                           oldPedido.trans_items.push(element) 
-                        }                    
-                    }
-                }else {
-                    oldPedido.trans_items.push({
-                        plan_key: item.plan_key,
-                        plan_name: item.plan_name,
-                        plan_amount: item.plan_amount,
-                        plan_value: item.trans_value,
-                        product_name: item.product_name,
-                        product_key: item.product_key,
-                        product_type: item.product_type
-                    })
-                }
-            }
-        }else {
-            for ( let item of pedido ) {
-                oldPedido.trans_items = []
-                if ( typeof item.trans_items != 'undefined' ) {
-                    for ( let element of item.trans_items ) {
-                        if ( element.main == 0 ) {
-                           oldPedido.trans_items.push(element) 
-                        }                    
-                    }
-                }else {
-                    oldPedido.trans_items.push({
-                        plan_key: oldPedido.plan_key,
-                        plan_name: oldPedido.plan_name,
-                        plan_amount: oldPedido.plan_amount,
-                        plan_value: oldPedido.trans_value,
-                        product_name: oldPedido.product_name,
-                        product_key: oldPedido.product_key,
-                        product_type: oldPedido.product_type
-                    })
-                    oldPedido.trans_items.push({
-                        plan_key: item.plan_key,
-                        plan_name: item.plan_name,
-                        plan_amount: item.plan_amount,
-                        plan_value: item.trans_value,
-                        product_name: item.product_name,
-                        product_key: item.product_key,
-                        product_type: item.product_type
-                    })
-                }
-            }
+    update_order: async (pedidoBd, pedido) => { // oldPedido = obj | pedido = array
+        let oldPedido = JSON.parse(pedidoBd.pedido)
+        for ( let item of pedido ) {
+            oldPedido.push(item)
         }
         let update = await Orders.update(
             {
                 pedido: JSON.stringify(oldPedido)
             }, 
-            { where: { documento: oldPedido.client_documment } }
+            { where: { documento: pedidoBd.documento } }
         )
         if ( update ) return true
         return false

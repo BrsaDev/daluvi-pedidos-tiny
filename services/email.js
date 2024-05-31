@@ -30,13 +30,7 @@ Data:        ${pedido.data}<br>
             `
         };
 
-        transporter.sendMail(mailOptions, function (erro, info) {
-            if (erro) {
-                return false
-            } else {
-                return true
-            }
-        });
+        return {mailOptions, transporter}
     }
 }
 

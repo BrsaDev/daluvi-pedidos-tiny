@@ -12,7 +12,7 @@ const check_time_orders_temp = async () => {
                         fn( 'timestampdiff', literal("minute"), col('time_entrada'),literal('CURRENT_TIMESTAMP')), 
                         {
                             // [Op.lt] : 120 // lt é = "menor que"
-                            [Op.gte] : 120 // gte é = "maior ou igual que"
+                            [Op.gte] : 23 // gte é = "maior ou igual que"
                         }
                     )
                 ]
@@ -66,7 +66,7 @@ module.exports = {
                 } 
             })
             resPedido = JSON.parse(JSON.stringify(resPedido, null, 2))
-            return resPedido
+            return resPedido || false
         } catch(erro) {
             return { erro }
         }        

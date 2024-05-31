@@ -13,7 +13,7 @@ module.exports = {
                 } 
             })
             email = JSON.parse(JSON.stringify(email, null, 2))
-            return { email }
+            return email || false
         } catch(erro) {
             return { erro }
         } 
