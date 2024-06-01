@@ -28,6 +28,9 @@ html, body {
 .my-w {
     width: auto !important;
 }
+.my-w-25 {
+    width: 25% !important;
+}
 .pointer {
     cursor: pointer !important;
 }
@@ -78,6 +81,9 @@ html, body {
         font-size: 0.748rem !important;
     }
     .my-w {
+        width: 100% !important;
+    }
+    .my-w-25 {
         width: 100% !important;
     }
 }

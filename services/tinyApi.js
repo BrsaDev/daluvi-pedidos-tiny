@@ -1,6 +1,7 @@
 const axios = require("axios")
 let OrdersTemp = require("../models/OrdersTemp")
 let Skus = require("../models/Skus")
+let SkusOrderBump = require("../models/SkusOrderBump")
 let EmailsEnviados = require("../models/EmailsEnviados")
 const { sendEmail } = require("./email")
 const { check_email_enviado } = require("../helpers/verifyEmail")
@@ -45,6 +46,12 @@ module.exports = {
             getSkus = JSON.parse(JSON.stringify(getSkus, null, 2))
             let baseSkus = {}
             for ( let base of getSkus ) { baseSkus[base.key] = base.sku }
+
+            let getSkusOrderBump = await SkusOrderBump.findAll()
+            getSkusOrderBump = JSON.parse(JSON.stringify(getSkusOrderBump, null, 2))
+            let baseSkusOrderBump = {}
+            for ( let baseOrderBump  of getSkusOrderBump ) { baseSkusOrderBump[baseOrderBump .key] = baseOrderBump .sku }
+
             let body = {
                 "pedido": {
                     "data_pedido": formateData(pedido.trans_createdate),
@@ -75,14 +82,16 @@ module.exports = {
             let skuNaoEncontrados = []
             if ( typeof pedido.trans_items != 'undefined' ) {
                 for ( let item of pedido.trans_items ) {
-                    if ( typeof baseSkus[item.product_key] == "undefined" ) {
+                    if ( typeof baseSkus[item.product_key] == "undefined" && typeof baseSkusOrderBump[item.plan_key] == "undefined" ) {
                         skuNaoEncontrados.push(item.product_key)
                     }
+                    let codigo = typeof baseSkus[item.product_key] == 'undefined' ? baseSkusOrderBump[item.plan_key] : baseSkus[item.product_key]
+                    let descricao = typeof baseSkus[item.product_key] == 'undefined' ? item.plan_name : item.product_name
                     body.pedido.itens.push(
                         {
                             "item": {
-                                "codigo": baseSkus[item.product_key],
-                                "descricao": item.product_name,
+                                "codigo": codigo,
+                                "descricao": descricao,
                                 "unidade": "UN",
                                 "quantidade": item.plan_amount,
                                 "valor_unitario": formateValor(item.plan_value)
@@ -91,14 +100,16 @@ module.exports = {
                     )
                 }
             }else {
-                if ( typeof baseSkus[pedido.product_key] == "undefined" ) {
+                if ( typeof baseSkus[pedido.product_key] == "undefined" && typeof baseSkusOrderBump[pedido.plan_key] == "undefined" ) {
                     skuNaoEncontrados.push(pedido.product_key)
                 }
+                let codigo = typeof baseSkus[pedido.product_key] == 'undefined' ? baseSkusOrderBump[pedido.plan_key] : baseSkus[pedido.product_key]
+                let descricao = typeof baseSkus[pedido.product_key] == 'undefined' ? pedido.plan_name : pedido.product_name
                 body.pedido.itens.push(
                     {
                         "item": {
-                            "codigo": baseSkus[pedido.product_key],
-                            "descricao": pedido.product_name,
+                            "codigo": codigo,
+                            "descricao": descricao,
                             "unidade": "UN",
                             "quantidade": pedido.plan_amount,
                             "valor_unitario": formateValor(pedido.trans_value)

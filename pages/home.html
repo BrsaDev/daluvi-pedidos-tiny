@@ -29,11 +29,20 @@
                     <div id="cadastro-sku" class="w-100">
                         <div class="w-100">
                            <label class="fs-3 fw-bold text-center text-md-left">Interligação de código da plataforma com sku</label>
+                           <div class="my-w-25 mt-2">
+                                <select class="form-select form-select-sm" id="select-tipo-cadastro" onchange="selectcadastro(this)">
+                                    <option value="no-orderBump">Sem order bump</option>
+                                    <option value="orderBump">Com order bump</option>
+                                </select>
+                           </div>
                         </div>
-                        <div class="mt-3 card card-body bg-transparent shadow-sm">
+                        <div class="mt-3 fw-bold">
+                            <span id="titulo-info-cadastro">Cadastro (Sem Order Bump)</span>
+                       </div>
+                        <div class="card card-body bg-transparent shadow-sm">
                             <div class="row">
                                <div class="form-group col-12 col-md-6">
-                                    <label>PlanKey</label>
+                                    <label id="titulo-key-cadastro">ProductKey</label>
                                     <input autofocus type="text" id="key" class="form-control form-control-sm">
                                 </div>
                                 <div class="form-group col-12 col-md-6">
@@ -63,7 +72,7 @@
                                                 <tr class="text-center text-nowrap text-light bg-primary sticky">
                                                     <th scope="col">Key</th>
                                                     <th scope="col">Sku</th>
-                                                    <th scope="col"></th>
+                                                    <th scope="col">Order Bump</th>
                                                     <th scope="col"></th>
                                                     <th scope="col"></th>
                                                     <th scope="col"></th>
@@ -84,13 +93,34 @@
             </div>
         </div>
         <script>
+            let tituloKeyCadastro = document.querySelector('#titulo-key-cadastro')
+            let tituloInfoCadastro = document.querySelector('#titulo-info-cadastro')
+            let selectCadastro = document.querySelector('#select-tipo-cadastro')
             let key = document.querySelector("#key")
             let sku = document.querySelector("#sku")
             let tbody = document.querySelector("#tbody")
             let listagemSkus = document.querySelector("#listagem-skus")
             let btnListagemSkus = document.querySelector("#btn-listagem-skus")
             let btnEsconderSkus = document.querySelector("#btn-esconder-skus")
+            function selectcadastro(e) {
+                if ( e.options[e.options.selectedIndex].value == 'no-orderBump' ) {
+                    tituloKeyCadastro.innerText = "ProductKey"
+                    tituloInfoCadastro.innerText = "Cadastro (Sem Order Bump)"
+                }else {
+                    tituloKeyCadastro.innerText = "PlanKey"
+                    tituloInfoCadastro.innerText = "Cadastro (Com Order Bump)"
+                }
+            }
             async function cadastrarSku() {
+                if ( selectCadastro.value == "no-orderBump" ) {
+                    var orderBump = false
+                    var orderBumpResult = ""
+                }
+                else {
+                    var orderBump = true
+                    var orderBumpResult = "Sim"
+                }
+
                 let erros = []
                 if ( key.value == "" ) erros.push("PlanKey não pode ser vazio.")
                 if ( sku.value == "" ) erros.push("Sku não pode ser vazio.")
@@ -98,14 +128,16 @@
 
                 let response = await axios.post("https://ferramentasdaluvi.com/cadastrar-sku", {
                     key: key.value.trim(), 
-                    sku: sku.value.trim()
+                    sku: sku.value.trim(),
+                    orderBump
                 })
+                 
                 if ( response.data.resultado ) {
                     tbody.innerHTML += `
                         <tr class="text-nowrap">
-                            <td scope="col" class="text-center"><i class="fas fa-trash-alt pointer" style="margin-right: 5px;" onclick="deleteSku('${response.data.resultado.sku}')"></i>${response.data.resultado.key}</td>
+                            <td scope="col" class="text-center"><i class="fas fa-trash-alt pointer" style="margin-right: 5px;" onclick="deleteSku('${response.data.resultado.sku}', ${orderBump})"></i>${response.data.resultado.key}</td>
                             <td scope="col" class="text-center">${response.data.resultado.sku}</td>
-                            <td scope="col" class="text-center"></td>
+                            <td scope="col" class="text-center">${orderBumpResult}</td>
                             <td scope="col" class="text-center"></td>
                             <td scope="col" class="col-vazia"></td>
                             <td scope="col" class="col-vazia"></td>
@@ -116,7 +148,10 @@
                     `
                     key.value = ""
                     sku.value = ""
-                    return //alert("Sku cadastrado com sucesso.")
+                    if ( listagemSkus.classList.toString().includes('d-none') ) {
+                        alert("Sku cadastrado com sucesso.")
+                    }
+                    return
                 }
                 if ( response.data.erro && response.data.msg == "Valores vazios." ) {
                     return alert("Preencha corretamente os campos para enviar.")
@@ -142,8 +177,8 @@
                     btnEsconderSkus.classList.add('d-none')
                 }
             }
-            async function deleteSku(sku) {
-                let response = await axios.post("https://ferramentasdaluvi.com/delete-sku", {sku})
+            async function deleteSku(sku, orderBump) {
+                let response = await axios.post("https://ferramentasdaluvi.com/delete-sku", {sku, orderBump})
                 if ( response.data.msg == "Sku deletado" ) {
                     let trs = tbody.getElementsByTagName('tr')
                     let linha = 0
@@ -156,16 +191,24 @@
                     }
                 }
             }
-            async function getSkus() {
-                let response = await axios("https://ferramentasdaluvi.com/buscar-skus")
+            async function getSkus(orderBump) {
+                if ( !orderBump ) {
+                    var orderBumpResult = ""
+                    var orderBumpParam = ""
+                }
+                else {
+                    var orderBumpResult = "Sim"
+                    var orderBumpParam = "?orderBump=true"
+                }
+                let response = await axios("https://ferramentasdaluvi.com/buscar-skus"+orderBumpParam)
                 let lista = ""
                 if ( response.data.skus ) {
                     for ( let item of response.data.skus ) {
                         lista += `
                         <tr class="text-nowrap">
-                            <td scope="col" class="text-center"><i class="fas fa-trash-alt pointer" style="margin-right: 5px;" onclick="deleteSku('${item.sku}')"></i>${item.key}</td>
+                            <td scope="col" class="text-center"><i class="fas fa-trash-alt pointer" style="margin-right: 5px;" onclick="deleteSku('${item.sku}', ${orderBump})"></i>${item.key}</td>
                             <td scope="col" class="text-center">${item.sku}</td>
-                            <td scope="col" class="text-center"></td>
+                            <td scope="col" class="text-center">${orderBumpResult}</td>
                             <td scope="col" class="text-center"></td>
                             <td scope="col" class="col-vazia"></td>
                             <td scope="col" class="col-vazia"></td>
@@ -176,9 +219,10 @@
                         `
                     }
                 }
-                tbody.innerHTML = lista
+                tbody.innerHTML += lista
             }
-            getSkus()
+            getSkus(true)
+            getSkus(false)
             
         </script>
     </body>

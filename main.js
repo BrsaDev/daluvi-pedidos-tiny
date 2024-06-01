@@ -6,6 +6,7 @@ let { create_order_temp, update_order_temp, create_order, update_order } = requi
 const { chech_exists_order_temp, chech_exists_order, isPedidoAprovado, isUpsell } = require("./helpers/verifyOrder")
 const { interval_create_order } = require("./helpers/interval")
 let Skus = require("./models/Skus")
+let SkusOrderBump = require("./models/SkusOrderBump")
 
 // interval_create_order()
 
@@ -48,15 +49,24 @@ app.post("/receiver-orders", async (req, res) => {
 
 app.get("/buscar-skus", async (req, res) => {
     try {
-        let skus = await Skus.findAll()
+        let { orderBump } = req.query
+        if ( orderBump ) {
+            var skus = await SkusOrderBump.findAll()
+        }else {
+            var skus = await Skus.findAll()
+        }
         skus = JSON.parse(JSON.stringify(skus, null, 2))
         return res.json({ skus })
     }catch(erro) { return res.json({erro, msg: "Erro no buscar os skus"})}
 })
 
 app.post("/delete-sku", async (req, res) => {
-    let { sku } = req.body
-    let resSku = await Skus.destroy({ where:{ sku } })
+    let { sku, orderBump } = req.body
+    if ( orderBump ) {
+        var resSku = await SkusOrderBump.destroy({ where:{ sku } }) 
+    }else {
+       var resSku = await Skus.destroy({ where:{ sku } }) 
+    }
     resSku = JSON.parse(JSON.stringify(resSku, null, 2))
     if ( resSku ) return res.json({msg: "Sku deletado"})
     res.json({msg: "Erro"})
@@ -64,9 +74,12 @@ app.post("/delete-sku", async (req, res) => {
 
 app.post("/cadastrar-sku", async (req, res) => {
     try {
-        let { sku, key } = req.body
+        let { sku, key, orderBump } = req.body
+        if ( orderBump ) var SkusBd = SkusOrderBump
+        else var SkusBd = Skus
+
         if ( sku == "" || key == "" ) return res.json({ erro: "OK", msg: "Valores vazios."})
-        let resSku = await Skus.findOne({ where:{ [Op.or]: {sku, key} } })
+        let resSku = await SkusBd.findOne({ where:{ [Op.or]: {sku, key} } })
         resSku = JSON.parse(JSON.stringify(resSku, null, 2))
         if ( resSku ) {
             if ( resSku.sku == sku ) {
@@ -76,7 +89,7 @@ app.post("/cadastrar-sku", async (req, res) => {
                 return res.json({ erro: "OK", msg: "Key já cadastrado" })
             }
         }else {
-            let response = await Skus.create({
+            let response = await SkusBd.create({
                 key,
                 sku
             })
