@@ -28,6 +28,12 @@ function formateData(data) {
     return data.toLocaleDateString()
 }
 function formateValor(valor) {
+    if ( valor.toString().length == 3 ) {
+        return parseFloat( valor.toString().slice(0, 1) + '.' + valor.toString().slice(1) )
+    }
+    if ( valor.toString().length == 4 ) {
+        return parseFloat( valor.toString().slice(0, 2) + '.' + valor.toString().slice(2) )
+    }
     if ( valor.toString().length == 5 ) {
         return parseFloat( valor.toString().slice(0, 3) + '.' + valor.toString().slice(3) )
     }
@@ -74,7 +80,7 @@ module.exports = {
                     "forma_pagamento": tipoPagamento[pedido.trans_payment],
                     "valor_frete": pedido.trans_freight,
                     "valor_desconto": pedido.trans_discount_value,
-                    "situacao": "Aprovado",
+                    "situacao": "Em Aberto",
                     "forma_envio": pedido.trans_freight_type,
                     "forma_frete": pedido.trans_freight_type
                 }
@@ -85,8 +91,13 @@ module.exports = {
                     if ( typeof baseSkus[item.product_key] == "undefined" && typeof baseSkusOrderBump[item.plan_key] == "undefined" ) {
                         skuNaoEncontrados.push(item.product_key)
                     }
-                    let codigo = typeof baseSkus[item.product_key] == 'undefined' ? baseSkusOrderBump[item.plan_key] : baseSkus[item.product_key]
-                    let descricao = typeof baseSkus[item.product_key] == 'undefined' ? item.plan_name : item.product_name
+                    if ( item.main == 1 ) {
+                        var codigo = typeof baseSkus[item.product_key] == 'undefined' ? baseSkusOrderBump[item.plan_key] : baseSkus[item.product_key]
+                        var descricao = typeof baseSkus[item.product_key] == 'undefined' ? item.plan_name : item.product_name
+                    }else {
+                        var codigo = typeof baseSkusOrderBump[item.plan_key] == 'undefined' ? baseSkus[item.product_key] : baseSkusOrderBump[item.plan_key]
+                        var descricao = typeof baseSkusOrderBump[item.plan_key] == 'undefined' ? item.product_name : item.plan_name
+                    }
                     body.pedido.itens.push(
                         {
                             "item": {
@@ -94,7 +105,7 @@ module.exports = {
                                 "descricao": descricao,
                                 "unidade": "UN",
                                 "quantidade": item.plan_amount,
-                                "valor_unitario": formateValor(item.plan_value)
+                                "valor_unitario": parseFloat(formateValor(item.plan_value))/item.plan_amount
                             }
                         }
                     )
@@ -112,7 +123,7 @@ module.exports = {
                             "descricao": descricao,
                             "unidade": "UN",
                             "quantidade": pedido.plan_amount,
-                            "valor_unitario": formateValor(pedido.trans_value)
+                            "valor_unitario": parseFloat(formateValor(pedido.trans_value))/pedido.plan_amount
                         }
                     }
                 )
@@ -147,6 +158,7 @@ module.exports = {
             let response = await axios.post(`https://api.tiny.com.br/api2/pedido.incluir.php?token=${token}&formato=json&pedido=${JSON.stringify(body)}`)
             
             if ( response.data.retorno.status == "OK" ) {
+                console.log(response.data.retorno)
                 return body.pedido
             }
             return false

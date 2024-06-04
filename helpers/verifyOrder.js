@@ -1,4 +1,4 @@
-const { Op, literal, fn, col, where } = require('sequelize')
+const { Op, literal, fn, col, where } = require("sequelize")
 const OrdersTemp = require("../models/OrdersTemp")
 const Orders = require("../models/Orders")
 
@@ -9,7 +9,7 @@ const check_time_orders_temp = async () => {
             where: {
                 [Op.and] : [
                     where(
-                        fn( 'timestampdiff', literal("minute"), col('time_entrada'),literal('CURRENT_TIMESTAMP')), 
+                        fn( "timestampdiff", literal("minute"), col("time_entrada"),literal("CURRENT_TIMESTAMP")), 
                         {
                             // [Op.lt] : 120 // lt é = "menor que"
                             [Op.gte] : 120 // gte é = "maior ou igual que"
@@ -30,7 +30,7 @@ const check_time_orders = async (documento) => {
             where: {
                 [Op.and] : [
                     where(
-                        fn( 'timestampdiff', literal("minute"), col('time_entrada'), literal('CURRENT_TIMESTAMP')), 
+                        fn( "timestampdiff", literal("minute"), col("time_entrada"), literal("CURRENT_TIMESTAMP")), 
                         {
                             [Op.lt] : 122
                         }
@@ -83,7 +83,7 @@ module.exports = {
     isUpsell: (pedido) => { // pedido vem como array
         let upSell = null
         for ( let item of pedido ) {
-            if ( typeof item.is_upsell != 'undefined' && item.is_upsell == "1" ) {
+            if ( typeof item.is_upsell != "undefined" && item.is_upsell == "1" ) {
                 upSell = item
                 break
             }
@@ -94,7 +94,7 @@ module.exports = {
         let formaPagamento = {"2": "Cartão de Crédito", "5": "Pix"}
         let aprovado = null
         for ( let item of pedido ) {
-            if ( typeof item.trans_status != 'undefined' && item.trans_status == "Pagamento Aprovado" && typeof item.trans_payment != 'undefined' && formaPagamento[item.trans_payment] ) {
+            if ( typeof item.trans_status != "undefined" && item.trans_status == "Pagamento Aprovado" && typeof item.trans_payment != "undefined" && formaPagamento[item.trans_payment] ) {
                 aprovado = item
                 break
             }
@@ -102,3 +102,5 @@ module.exports = {
         return aprovado
     }
 }
+
+    

@@ -52,7 +52,8 @@ module.exports = {
                     plan_value: pedidoNovo.trans_value,
                     product_name: pedidoNovo.product_name,
                     product_key: pedidoNovo.product_key,
-                    product_type: pedidoNovo.product_type
+                    product_type: pedidoNovo.product_type,
+                    main: 1
                 }) 
             }
         }else {
@@ -65,7 +66,8 @@ module.exports = {
                     plan_value: pedido.trans_value,
                     product_name: pedido.product_name,
                     product_key: pedido.product_key,
-                    product_type: pedido.product_type
+                    product_type: pedido.product_type,
+                    main: 1
                 })
                 for ( let item of pedidoNovo.trans_items ) {
                     if ( item.main == 0 ) {
@@ -80,7 +82,8 @@ module.exports = {
                     plan_value: pedido.trans_value,
                     product_name: pedido.product_name,
                     product_key: pedido.product_key,
-                    product_type: pedido.product_type
+                    product_type: pedido.product_type,
+                    main: 1
                 })
                 pedido.trans_items.push({
                     plan_key: pedidoNovo.plan_key,
@@ -89,7 +92,8 @@ module.exports = {
                     plan_value: pedidoNovo.trans_value,
                     product_name: pedidoNovo.product_name,
                     product_key: pedidoNovo.product_key,
-                    product_type: pedidoNovo.product_type
+                    product_type: pedidoNovo.product_type,
+                    main: 1
                 }) 
             }
         }

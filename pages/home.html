@@ -31,15 +31,15 @@
                            <label class="fs-3 fw-bold text-center text-md-left">Interligação de código da plataforma com sku</label>
                            <div class="my-w-25 mt-2">
                                 <select class="form-select form-select-sm" id="select-tipo-cadastro" onchange="selectcadastro(this)">
-                                    <option value="no-orderBump">Sem order bump</option>
-                                    <option value="orderBump">Com order bump</option>
+                                    <option value="no-orderBump">Cadastrar produto</option>
+                                    <option value="orderBump">Cadastrar order bump</option>
                                 </select>
                            </div>
                         </div>
                         <div class="mt-3 fw-bold">
-                            <span id="titulo-info-cadastro">Cadastro (Sem Order Bump)</span>
+                            <span id="titulo-info-cadastro">Cadastrar produto</span>
                        </div>
-                        <div class="card card-body bg-transparent shadow-sm">
+                        <div id="card" class="card card-body bg-blue-info shadow-sm">
                             <div class="row">
                                <div class="form-group col-12 col-md-6">
                                     <label id="titulo-key-cadastro">ProductKey</label>
@@ -102,13 +102,16 @@
             let listagemSkus = document.querySelector("#listagem-skus")
             let btnListagemSkus = document.querySelector("#btn-listagem-skus")
             let btnEsconderSkus = document.querySelector("#btn-esconder-skus")
+            let card = document.querySelector("#card")
             function selectcadastro(e) {
                 if ( e.options[e.options.selectedIndex].value == 'no-orderBump' ) {
                     tituloKeyCadastro.innerText = "ProductKey"
-                    tituloInfoCadastro.innerText = "Cadastro (Sem Order Bump)"
+                    tituloInfoCadastro.innerText = "Cadastrar produto"
+                    card.classList.add("bg-blue-info")
                 }else {
                     tituloKeyCadastro.innerText = "PlanKey"
-                    tituloInfoCadastro.innerText = "Cadastro (Com Order Bump)"
+                    tituloInfoCadastro.innerText = "Cadastro order bump"
+                    card.classList.remove("bg-blue-info")
                 }
             }
             async function cadastrarSku() {
